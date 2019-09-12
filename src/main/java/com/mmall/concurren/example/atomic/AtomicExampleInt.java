@@ -1,20 +1,22 @@
-package com.mmall.concurren;
+package com.mmall.concurren.example.atomic;
 
-import com.sun.media.jfxmedia.logging.Logger;
-import lombok.extern.java.Log;
+import com.mmall.concurren.annoations.ThreadSafe;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import sun.java2d.SurfaceDataProxy;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-public class ConcurrencyTest {
+@ThreadSafe
+public class AtomicExampleInt {
     //请求总数
-    public static int clientTotal = 1000;
+     private static int clientTotal = 5000;
     //同时并发执行的线程数
-    public static int threadTotal = 200;
-    public static int count = 0;
+     private static int threadTotal = 200;
+     private static AtomicInteger count = new AtomicInteger(0);
     public static void main(String[] args) throws Exception{
         //创建线程池
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -29,16 +31,19 @@ public class ConcurrencyTest {
                     add();
                     semaphore.release();
                 }catch (Exception e){
-                    log.error("erro",e);
+                    log.error("exception",e);
                 }
                 countDownLatch.countDown();
             });
         }
         countDownLatch.await();
-
-        log.info("count:{}",count);
+        executorService.shutdown();
+        log.info("count:{}",count.get());
     }
-    public static void add(){
-        count++;
+     private static void add(){
+        //先增加再获取值
+        count.incrementAndGet();
+        //先获取值再增加
+        //count.getAndIncrement()
     }
 }
