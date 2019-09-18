@@ -43,7 +43,7 @@ public class DataFormatExample1 {
     private static void update(){
           SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            simpleDateFormat.parse("20180208");
+            simpleDateFormat.parse("2018-02-08");
         }catch (Exception e){
             log.error("parse exception",e);
         }

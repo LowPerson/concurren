@@ -1,26 +1,25 @@
-package com.mmall.concurren.example.communsafe;
+package com.mmall.concurren.example.syncContainer;
 
-import com.mmall.concurren.annoations.ThreadSafe;
+import com.mmall.concurren.annoations.NotThreadSafe;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
 @Slf4j
-@ThreadSafe
-public class DataFormatExample2 {
-
+@NotThreadSafe
+public class CollectionsSyncListExample {
     //请求总数
     private static int clientTotal = 5000;
     //同时并发执行的线程数
     private static int threadTotal = 200;
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd");
+    private static List<Integer> list = Collections.synchronizedList(new ArrayList<>());
     public static void main(String[] args) throws Exception{
         //创建线程池
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -43,8 +42,9 @@ public class DataFormatExample2 {
         }
         countDownLatch.await();
         executorService.shutdown();
+        log.info("list.length:{}", list.size());
     }
     private static void update(int i){
-        log.info("{} , {}", i , DateTime.parse("20180208",dateTimeFormatter).toDate());
+        list.add(i);
     }
 }

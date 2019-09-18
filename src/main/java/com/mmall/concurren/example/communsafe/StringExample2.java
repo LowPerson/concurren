@@ -40,6 +40,6 @@ public class StringExample2 {
         log.info("stringBuilder.size:{}",stringBuilder.length());
     }
     private static void update(){
-        stringBuilder.append("1")
+        stringBuilder.append("1");
     }
 }

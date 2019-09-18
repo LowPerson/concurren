@@ -1,26 +1,24 @@
-package com.mmall.concurren.example.communsafe;
+package com.mmall.concurren.example.lock;
 
 import com.mmall.concurren.annoations.ThreadSafe;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
-import java.text.SimpleDateFormat;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.StampedLock;
 
 @Slf4j
 @ThreadSafe
-public class DataFormatExample2 {
-
+public class LockExample5 {
     //请求总数
-    private static int clientTotal = 5000;
+     private static int clientTotal = 5000;
     //同时并发执行的线程数
     private static int threadTotal = 200;
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd");
+    private static int count = 0;
+    private static StampedLock lock = new StampedLock();
     public static void main(String[] args) throws Exception{
         //创建线程池
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -29,11 +27,10 @@ public class DataFormatExample2 {
         //定义计数器
         final CountDownLatch countDownLatch = new CountDownLatch(clientTotal);
         for (int i = 0; i < clientTotal; i++){
-            int count = i;
             executorService.execute(() ->{
                 try {
                     semaphore.acquire();
-                    update(count);
+                    add();
                     semaphore.release();
                 }catch (Exception e){
                     log.error("exception",e);
@@ -43,8 +40,18 @@ public class DataFormatExample2 {
         }
         countDownLatch.await();
         executorService.shutdown();
+        log.info("count:{}",count);
     }
-    private static void update(int i){
-        log.info("{} , {}", i , DateTime.parse("20180208",dateTimeFormatter).toDate());
+     private static void add(){
+        // 要把返回的stamp传到解锁处，用来解锁
+        long stamp = lock.writeLock();
+        try {
+            count++;
+        }catch (Exception e){
+            log.error("exception:{}",e);
+        }finally {
+            lock.unlock(stamp);
+        }
+
     }
 }
